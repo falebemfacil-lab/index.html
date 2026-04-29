@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agência Virtual</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #17a58a;
+      --primary-dark: #138f77;
+      --bg: #f2f2f2;
+      --card: #ffffff;
+      --fg: #141414;
+      --muted: #737373;
+      --border: #e5e5e5;
+      --hero-gradient: linear-gradient(135deg, #17a58a 0%, #138f77 100%);
+      --radius: 1rem;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Header */
+    header { background: var(--card); position: sticky; top: 0; z-index: 40; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .header-inner { max-width: 36rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; }
+    .header-logo { height: 2rem; }
+    .menu-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 4px; }
+    .menu-btn svg { width: 24px; height: 24px; }
+    .menu-nav { background: var(--card); border-top: 1px solid var(--border); padding: 0 1rem 0.75rem; display: none; }
+    .menu-nav.open { display: block; }
+    .menu-nav a { display: block; padding: 0.5rem 0; font-size: 0.875rem; color: var(--fg); }
+    .menu-nav a:hover { color: var(--primary); }
+
+    /* Banner */
+    .banner-wrap { padding: 1.5rem 1rem 1rem; }
+    .banner { max-width: 36rem; margin: 0 auto; border-radius: var(--radius); padding: 1.5rem; background: var(--hero-gradient); }
+    .banner h1 { font-family: 'Manjari', sans-serif; font-size: 1.25rem; font-weight: 600; color: #fff; }
+    .banner .proto { color: rgba(255,255,255,0.7); font-size: 0.75rem; margin-top: 0.5rem; font-family: monospace; }
+
+    /* Services */
+    .services { padding: 0 1rem 2rem; }
+    .services-inner { max-width: 36rem; margin: 0 auto; }
+    .services-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; background: var(--card); border-radius: var(--radius); padding: 1.5rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); text-align: center; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .card-icon { width: 3.5rem; height: 3.5rem; border-radius: 0.75rem; background: #fff3e6; display: flex; align-items: center; justify-content: center; transition: transform 0.3s; }
+    .card:hover .card-icon { transform: scale(1.1); }
+    .card-icon svg { width: 1.75rem; height: 1.75rem; }
+    .card h3 { font-size: 0.875rem; font-weight: 600; color: var(--fg); }
+
+    /* FAB */
+    .fab { position: fixed; bottom: 1.5rem; right: 1.5rem; width: 3.5rem; height: 3.5rem; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.2); transition: transform 0.3s; z-index: 50; border: none; cursor: pointer; }
+    .fab:hover { transform: scale(1.1); }
+    .fab svg { width: 1.75rem; height: 1.75rem; }
+
+    /* Modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.active { display: flex; }
+    .modal { background: var(--card); border-radius: var(--radius); padding: 2.5rem 2rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; max-width: 20rem; width: 90%; }
+    .spinner { width: 2.5rem; height: 2.5rem; border: 4px solid var(--primary); border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .modal p { font-size: 0.875rem; color: var(--muted); text-align: center; }
+
+    /* Footer */
+    footer { background: var(--card); border-top: 1px solid var(--border); padding: 1.5rem 1rem; text-align: center; }
+    footer a { font-size: 0.75rem; color: var(--muted); }
+    footer a:hover { color: var(--primary); }
+    footer .copy { font-size: 0.75rem; color: rgba(115,115,115,0.5); margin-top: 0.5rem; }
+
+    /* Privacy Page */
+    .page { display: none; min-height: 100vh; flex-direction: column; }
+    .page.active { display: flex; }
+    .inst-container { max-width: 42rem; margin: 0 auto; padding: 2.5rem 1rem; }
+    .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary-dark); font-size: 0.875rem; margin-bottom: 1.5rem; }
+    .back-link:hover { text-decoration: underline; }
+    .back-link svg { width: 1rem; height: 1rem; }
+    .inst-container h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+    .inst-content { font-size: 0.875rem; color: var(--muted); line-height: 1.7; }
+    .inst-content p { margin-bottom: 0.75rem; }
+
+    /* Tabs */
+    .tabs-wrap { max-width: 36rem; margin: 0 auto; padding: 0 1rem; }
+    .tabs-label { font-size: 0.875rem; color: var(--fg); margin-bottom: 0.5rem; }
+    .tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+    .tab { background: none; border: none; padding: 0.5rem 0; font-size: 1rem; cursor: pointer; color: #f28c1f; position: relative; font-family: inherit; font-weight: 600; }
+    .tab.active { color: #17a58a; }
+    .tab.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: #17a58a; border-radius: 2px; }
+    .services-panel { display: none; }
+    .services-panel.active { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- ====== PÁGINA PRINCIPAL ====== -->
+<div id="page-home" class="page active">
+  <header>
+    <div class="header-inner">
+      <!-- IMPORTANTE: Substitua o src abaixo pelo caminho da sua logo Light -->
+      <button class="menu-btn" onclick="toggleMenu()" aria-label="Menu">
+        <svg id="icon-menu" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg id="icon-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <nav id="menu-nav" class="menu-nav">
+      <a href="#privacidade" onclick="showPage('privacidade')">Política de Privacidade</a>
+    </nav>
+  </header>
+
+  <div style="flex:1">
+    <!-- Banner -->
+    <div class="banner-wrap">
+      <div class="banner">
+        <h1>Olá! Bem-vindo à sua<br>Agência Virtual</h1>
+        <p class="proto">Protocolo: 2024.9182.331-0</p>
+      </div>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="services">
+      <div class="services-inner">
+        <p class="tabs-label">Serviços on-line para:</p>
+        <div class="tabs">
+          <button type="button" class="tab active" data-tab="casa" onclick="showTab('casa')">Sua Casa</button>
+          <button type="button" class="tab" data-tab="empresa" onclick="showTab('empresa')">Sua Empresa</button>
+        </div>
+
+        <div id="panel-casa" class="services-panel active">
+          <div class="grid">
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v15l-2-1-2 1-2-1-2 1-2-1-2 1V2z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            </div>
+            <h3>Segunda Via da Conta</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            </div>
+            <h3>Ligação Nova</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M15 20c0-2 2-3.5 4-3.5s2 1 2 1"/></svg>
+            </div>
+            <h3>Troca de nome na conta</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v15l-2-1-2 1-2-1-2 1-2-1-2 1V2z"/><circle cx="14" cy="11" r="2"/><path d="M14 9v-1"/></svg>
+            </div>
+            <h3>Tarifa Social</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>
+            </div>
+            <h3>Histórico de Consumo</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            </div>
+            <h3>Alteração de Carga</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v15l-2-1-2 1-2-1-2 1-2-1-2 1V2z"/><line x1="9" y1="11" x2="13" y2="15"/><line x1="13" y1="11" x2="9" y2="15"/></svg>
+            </div>
+            <h3>Encerramento de Contrato</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="9 7 17 7 17 15"/></svg>
+            </div>
+            <h3>Ver todos os serviços</h3>
+          </div>
+
+          </div>
+        </div>
+
+        <div id="panel-empresa" class="services-panel">
+          <div class="grid">
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v15l-2-1-2 1-2-1-2 1-2-1-2 1V2z"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+            </div>
+            <h3>Segunda Via da Conta</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            </div>
+            <h3>Ligação Nova</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5"/><path d="M15 20c0-2 2-3.5 4-3.5s2 1 2 1"/></svg>
+            </div>
+            <h3>Troca de nome na conta</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v15l-2-1-2 1-2-1-2 1-2-1-2 1V2z"/><circle cx="14" cy="11" r="2"/><path d="M14 9v-1"/></svg>
+            </div>
+            <h3>Tarifa Social</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="4" height="9"/><rect x="10" y="7" width="4" height="14"/><rect x="17" y="3" width="4" height="18"/></svg>
+            </div>
+            <h3>Histórico de Consumo</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            </div>
+            <h3>Alteração de Carga</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v15l-2-1-2 1-2-1-2 1-2-1-2 1V2z"/><line x1="9" y1="11" x2="13" y2="15"/><line x1="13" y1="11" x2="9" y2="15"/></svg>
+            </div>
+            <h3>Encerramento de Contrato</h3>
+          </div>
+
+          <div class="card" onclick="handleService()">
+            <div class="card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#f28c1f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="9 7 17 7 17 15"/></svg>
+            </div>
+            <h3>Ver todos os serviços</h3>
+          </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- FAB WhatsApp -->
+  <a href="https://wa.me/5521972290985?text=Ol%C3%A1!%20Desejo%20ser%20atendido." target="_blank" rel="noopener noreferrer" class="fab" aria-label="WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
+  <footer>
+    <a href="#privacidade" onclick="showPage('privacidade')">Política de Privacidade</a>
+    <p class="copy">© 2026 Atendimento Online • Todos os direitos reservados</p>
+  </footer>
+</div>
+
+<!-- ====== POLÍTICA DE PRIVACIDADE ====== -->
+<div id="page-privacidade" class="page">
+  <div style="min-height:100vh; background:var(--bg);">
+    <div class="inst-container">
+      <a href="#home" onclick="showPage('home')" class="back-link">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        Voltar
+      </a>
+      <h1>Política de Privacidade</h1>
+      <div class="inst-content">
+        <p><strong>POLÍTICA DE PRIVACIDADE</strong></p>
+        <p>Este portal atua como um facilitador de atendimento para agilizar o suporte ao cliente.</p>
+        <p>Não coletamos, armazenamos ou processamos dados pessoais neste ambiente.</p>
+        <p>Ao clicar em nossos serviços, você será redirecionado para o atendimento via aplicativo de mensagens (WhatsApp), onde a interação seguirá as normas de privacidade da plataforma de destino.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL DE CARREGAMENTO ====== -->
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal">
+    <div class="spinner"></div>
+    <p>Consultando base de dados...<br>Por favor, aguarde.</p>
+  </div>
+</div>
+
+<script>
+  var WHATSAPP_URL = "https://wa.me/5521972290985?text=Ol%C3%A1!%20Desejo%20ser%20atendido.";
+
+  function toggleMenu() {
+    var nav = document.getElementById('menu-nav');
+    var iconMenu = document.getElementById('icon-menu');
+    var iconClose = document.getElementById('icon-close');
+    var open = nav.classList.toggle('open');
+    iconMenu.style.display = open ? 'none' : 'block';
+    iconClose.style.display = open ? 'block' : 'none';
+  }
+
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+    var target = document.getElementById('page-' + page);
+    if (target) { target.classList.add('active'); window.scrollTo(0, 0); }
+  }
+
+  function handleService() {
+    window.open(WHATSAPP_URL, '_blank');
+  }
+
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach(function(b){
+      b.classList.toggle('active', b.dataset.tab === name);
+    });
+    document.querySelectorAll('.services-panel').forEach(function(p){
+      p.classList.toggle('active', p.id === 'panel-' + name);
+    });
+  }
+
+  // Hash navigation
+  function handleHash() {
+    var hash = window.location.hash.replace('#', '');
+    if (hash && document.getElementById('page-' + hash)) { showPage(hash); }
+    else { showPage('home'); }
+  }
+  window.addEventListener('hashchange', handleHash);
+  window.addEventListener('DOMContentLoaded', handleHash);
+</script>
+</body>
+</html>
